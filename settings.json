@@ -1,9 +1,0 @@
-{
-  "java.project.sourcePaths": [
-    "src/weathermusic"
-  ],
-  "java.project.outputPath": "bin",
-  "java.project.referencedLibraries": [
-    "lib/**/*.jar"
-  ]
-}
