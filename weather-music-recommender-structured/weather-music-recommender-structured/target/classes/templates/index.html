@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Music Recommender</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: black;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .container {
+      z-index: 1;
+      max-width: 90%;
+      padding: 20px;
+    }
+
+    h1, h2, h3 {
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 10px 0;
+      color: #ccc;
+    }
+
+    button, .btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 1rem;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s ease;
+    }
+
+    button:hover, .btn:hover {
+      background-color: #555;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 1rem;
+      margin-top: 10px;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .clouds {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 20%, transparent 70%);
+      animation: floatClouds 60s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes floatClouds {
+      0% { transform: translate(0%, 0%); }
+      100% { transform: translate(-50%, -50%); }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .result {
+      margin-top: 2rem;
+      border-top: 1px solid #555;
+      padding-top: 1rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="clouds"></div>
+
+  <div class="container">
+    <!-- Landing Section -->
+    <div id="landing" class="fade-in">
+      <h1>Welcome to Weather Recommendation System</h1>
+      <button onclick="showDetails()">Know More</button>
+    </div>
+
+    <!-- Details Section -->
+    <div id="details" class="hidden">
+      <h2>About the Project</h2>
+      <p>A music recommendation system which suggests music based on the current weather.</p>
+      <p>It integrates real-time weather data with a curated music library.</p>
+      <p>Helps enhance user experience by adapting music to environmental conditions.</p>
+      <p>Designed for personalized and mood-based music suggestions.</p>
+      <p>Useful for both casual listening and immersive experiences.</p>
+      <p>A seamless blend of meteorology and entertainment technology.</p>
+      <button onclick="showApp()">Get Started</button>
+    </div>
+
+    <!-- Weather Music App Section -->
+    <div id="app" class="hidden">
+      <h2>Weather Music Recommender</h2>
+      <p>Get music recommendations based on your current weather.</p>
+      <input type="text" id="cityInput" placeholder="Enter your city" />
+      <button class="btn" onclick="getRecommendation()">Get Recommendations</button>
+
+      <div class="result" id="resultBox" style="display:none;">
+        <h3 id="weatherTitle"></h3>
+        <p id="weatherInfo"></p>
+        <h3 id="genreTitle"></h3>
+        <ul id="trackList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showDetails() {
+      document.getElementById("landing").classList.add("hidden");
+      const details = document.getElementById("details");
+      details.classList.remove("hidden");
+      details.classList.add("fade-in");
+    }
+
+    function showApp() {
+      document.getElementById("details").classList.add("hidden");
+      const app = document.getElementById("app");
+      app.classList.remove("hidden");
+      app.classList.add("fade-in");
+    }
+
+    async function getRecommendation() {
+      const city = document.getElementById("cityInput").value;
+      if (!city) {
+        alert("Please enter a city name.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/recommend?city=${city}`);
+        const data = await response.json();
+
+        document.getElementById("resultBox").style.display = "block";
+        document.getElementById("weatherTitle").innerText = `Weather in ${data.city}`;
+        document.getElementById("weatherInfo").innerText =
+          `${data.weather} (${data.description}), ${data.temperatureC.toFixed(1)}°C`;
+
+        document.getElementById("genreTitle").innerText = `Genre: ${data.genre}`;
+        const trackList = document.getElementById("trackList");
+        trackList.innerHTML = "";
+
+        data.tracks.forEach((track, index) => {
+          const li = document.createElement("li");
+          li.textContent = `${index + 1}. ${track}`;
+          trackList.appendChild(li);
+        });
+
+      } catch (error) {
+        alert("Failed to fetch music recommendations.");
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
